@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webtoon/models/webtoon_detailmodel.dart';
 import 'package:webtoon/models/webtoon_episode_model.dart';
@@ -28,21 +27,6 @@ bool favorite = false;
 class _DetailScreenState extends State<DetailScreen> {
   late Future<WebtoonDetailmodel> detailInfo;
   late Future<List<WebtoonEpisodemodel>> episodes;
-  late SharedPreferences prefs;
-
-  Future initPrefs() async {
-    prefs = await SharedPreferences.getInstance();
-    final likeToons = prefs.getStringList('likeToons');
-    if (likeToons != null) {
-      if (likeToons.contains(widget.id)) {
-        setState(() {
-          favorite = true;
-        });
-      } else {
-        await prefs.setStringList('likeToons', []);
-      }
-    }
-  }
 
   @override
   void initState() {
@@ -51,19 +35,13 @@ class _DetailScreenState extends State<DetailScreen> {
     episodes = ApiService.getEpisode(widget.id);
   }
 
-  void onFavorite() async {
-    final likeToons = prefs.getStringList('likeToons');
-    if (likeToons != null) {
-      if (favorite) {
-        likeToons.remove(widget.id);
-      } else {
-        likeToons.add(widget.id);
-      }
-      prefs.setStringList('likeToons', likeToons);
+  void isFavorite() {
+    if (favorite) {
+      favorite = false;
+    } else {
+      favorite = true;
     }
-    setState(() {
-      favorite = !favorite;
-    });
+    setState(() {});
   }
 
   @override
@@ -73,7 +51,7 @@ class _DetailScreenState extends State<DetailScreen> {
       appBar: AppBar(
         actions: [
           IconButton(
-            onPressed: onFavorite,
+            onPressed: isFavorite,
             icon: Icon(
                 favorite ? Icons.favorite : Icons.favorite_border_outlined),
           ),
